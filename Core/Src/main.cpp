@@ -24,7 +24,7 @@
 #include "faults.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "clock.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,11 +90,7 @@ int main(void)
   MX_CAN1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  volatile uint32_t last_time_recorded = 0;
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(SysTick_IRQn);
+  clock_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,8 +100,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    int x = 5;
-    FAULT_CLEARALL(&x);
+    float deltaTime = clock_getDeltaTime();
+    led_rainbow(deltaTime);
   }
   /* USER CODE END 3 */
 }
