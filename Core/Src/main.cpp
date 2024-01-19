@@ -22,6 +22,7 @@
 #include "tim.h"
 #include "gpio.h"
 #include "faults.h"
+#include "vcu.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "clock.h"
@@ -91,6 +92,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   clock_init();
+  can_init(&hcan1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
