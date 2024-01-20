@@ -17,20 +17,20 @@ location_t location;
 void vcu_can_init(location_t loc) {
     switch(loc) {
         case FRONT_LEFT:
-            can_addOutbox(WHS_VCU_DISP_1, 0.250, &whs_fl_inbox);
-            can_addOutbox(WHS_VCU_IMU_1, 0.250, &imu_fl_inbox);
+            can_addOutbox(UNS_VCU_DISP_1, 0.250, &whs_fl_inbox);
+            can_addOutbox(UNS_VCU_IMU_1, 0.250, &imu_fl_inbox);
             break;
         case FRONT_RIGHT:
-            can_addOutbox(WHS_VCU_DISP_2, 0.250, &whs_fr_inbox);
-            can_addOutbox(WHS_VCU_IMU_2, 0.250, &imu_fr_inbox);
+            can_addOutbox(UNS_VCU_DISP_2, 0.250, &whs_fr_inbox);
+            can_addOutbox(UNS_VCU_IMU_2, 0.250, &imu_fr_inbox);
             break;
         case REAR_LEFT:
-            can_addOutbox(WHS_VCU_DISP_3, 0.250, &whs_bl_inbox);
-            can_addOutbox(WHS_VCU_IMU_3, 0.250, &imu_bl_inbox);
+            can_addOutbox(UNS_VCU_DISP_3, 0.250, &whs_bl_inbox);
+            can_addOutbox(UNS_VCU_IMU_3, 0.250, &imu_bl_inbox);
             break;
         case REAR_RIGHT:
-            can_addOutbox(WHS_VCU_DISP_4, 0.250, &whs_br_inbox);
-            can_addOutbox(WHS_VCU_IMU_4, 0.250, &imu_br_inbox);
+            can_addOutbox(UNS_VCU_DISP_4, 0.250, &whs_br_inbox);
+            can_addOutbox(UNS_VCU_IMU_4, 0.250, &imu_br_inbox);
             break;
         default:
             break;
