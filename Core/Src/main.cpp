@@ -125,7 +125,7 @@ int main(void)
       int16_t fieldX = (buffer[3] << 8) | (buffer[4]);
       int16_t fieldY = (buffer[5] << 8) | (buffer[6]);
       int16_t fieldZ = (buffer[7] << 8) | (buffer[8]);
-      float f = 1.0f / 10000.0f ;  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
+      float f = (1.0f / 10000.0f) * (255) ;  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
       float r = abs(fieldX) * f;
       float b = abs(fieldY) * f;
       float g = abs(fieldZ) * f;
