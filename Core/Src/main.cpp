@@ -18,10 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "angel_can.h"
+#include "can.h"
+#include "spi.h"
 #include "tim.h"
 #include "gpio.h"
-#include "faults.h"
+#include "cmath"
+
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "clock.h"
@@ -89,9 +92,20 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN1_Init();
   MX_TIM2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   clock_init();
-  /* USER CODE END 2 */
+
+
+  uint8_t buffer[10];
+  HAL_Delay(100);
+
+
+//    HAL_GPIO_WritePin()
+
+
+
+    /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -99,10 +113,33 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
+      buffer[0] = 0x0 | 0x3E; // single measurement cmd + zyx bits
+      HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
+      HAL_SPI_Receive(&hspi1, buffer,1 , 1000);
+
+      buffer[0] = 0x0 | 0x4E; // read command to get data from single measurement for ZYX only
+      HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
+      HAL_SPI_Receive(&hspi1, buffer,7 , 1000);
+
+      int16_t status = (buffer[0]);
+      int16_t fieldX = (buffer[3] << 8) | (buffer[4]);
+      int16_t fieldY = (buffer[5] << 8) | (buffer[6]);
+      int16_t fieldZ = (buffer[7] << 8) | (buffer[8]);
+      float f = 1.0f / 10000.0f ;  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
+      float r = abs(fieldX) * f;
+      float b = abs(fieldY) * f;
+      float g = abs(fieldZ) * f;
+      if(r < 0.05f) r = 0;
+      if(g < 0.05f) g = 0;
+      if(b < 0.05f) b = 0;
+      led_set(r, g, b);
+
     /* USER CODE BEGIN 3 */
     float deltaTime = clock_getDeltaTime();
     led_rainbow(deltaTime);
   }
+
+
   /* USER CODE END 3 */
 }
 
