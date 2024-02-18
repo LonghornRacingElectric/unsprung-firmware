@@ -122,11 +122,11 @@ int main(void)
       HAL_SPI_Receive(&hspi1, buffer,8 , 1000);
 
       int16_t status = (buffer[0]);
-      int16_t fieldX = (buffer[2] << 8) | (buffer[2]);
+      int16_t fieldX = (buffer[1] << 8) | (buffer[2]);
       int16_t fieldY = (buffer[3] << 8) | (buffer[4]);
       int16_t fieldZ = (buffer[5] << 8) | (buffer[6]);
       int16_t crc = buffer[7];
-      float f = (2.5f);  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
+      float f = (0.00714f * (1.0f / 100.0f));
       float r = abs(fieldX) * f;
       float b = abs(fieldY) * f;
       float g = abs(fieldZ) * f;
