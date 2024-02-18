@@ -113,19 +113,20 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-      buffer[0] = 0x0 | 0x3E; // single measurement cmd + zyx bits
+      buffer[0] = 0x3E; // single measurement cmd + zyx bits
       HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
       HAL_SPI_Receive(&hspi1, buffer,1 , 1000);
 
-      buffer[0] = 0x0 | 0x4E; // read command to get data from single measurement for ZYX only
+      buffer[0] = 0x4E; // read command to get data from single measurement for ZYX only
       HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
-      HAL_SPI_Receive(&hspi1, buffer,7 , 1000);
+      HAL_SPI_Receive(&hspi1, buffer,8 , 1000);
 
       int16_t status = (buffer[0]);
-      int16_t fieldX = (buffer[3] << 8) | (buffer[4]);
-      int16_t fieldY = (buffer[5] << 8) | (buffer[6]);
-      int16_t fieldZ = (buffer[7] << 8) | (buffer[8]);
-      float f = (1.0f / 10000.0f) * (255) ;  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
+      int16_t fieldX = (buffer[2] << 8) | (buffer[2]);
+      int16_t fieldY = (buffer[3] << 8) | (buffer[4]);
+      int16_t fieldZ = (buffer[5] << 8) | (buffer[6]);
+      int16_t crc = buffer[7];
+      float f = (2.5f);  // Max range of -1T to +1T / 10,000 to get a percentage since return value is in mT
       float r = abs(fieldX) * f;
       float b = abs(fieldY) * f;
       float g = abs(fieldZ) * f;
