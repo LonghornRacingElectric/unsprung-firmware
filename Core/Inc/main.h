@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "led.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -63,6 +63,20 @@ void Error_Handler(void);
 #define LED_G_GPIO_Port GPIOA
 #define LED_B_Pin GPIO_PIN_2
 #define LED_B_GPIO_Port GPIOA
+#define SPI_CS_IMU_Pin GPIO_PIN_1
+#define SPI_CS_IMU_GPIO_Port GPIOB
+#define SPI_CS_EEPROM_Pin GPIO_PIN_10
+#define SPI_CS_EEPROM_GPIO_Port GPIOB
+#define SPI_CS_WS1_Pin GPIO_PIN_12
+#define SPI_CS_WS1_GPIO_Port GPIOB
+#define Calib_Button_Pin GPIO_PIN_12
+#define Calib_Button_GPIO_Port GPIOA
+#define SPI_CS_WS2_Pin GPIO_PIN_15
+#define SPI_CS_WS2_GPIO_Port GPIOA
+#define BOOT0_Shorted_Dont_Use_Pin GPIO_PIN_7
+#define BOOT0_Shorted_Dont_Use_GPIO_Port GPIOB
+#define BOOT0_Dont_Use_Pin GPIO_PIN_3
+#define BOOT0_Dont_Use_GPIO_Port GPIOH
 
 /* USER CODE BEGIN Private defines */
 

@@ -22,12 +22,12 @@
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
-#include "cmath"
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <cmath>
 #include "clock.h"
+#include "led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static uint8_t buffer[10];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,9 +95,9 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   clock_init();
+  led_init();
 
 
-  uint8_t buffer[10];
   HAL_Delay(100);
 
 
@@ -105,7 +105,7 @@ int main(void)
 
 
 
-    /* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -113,31 +113,36 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-      buffer[0] = 0x3E; // single measurement cmd + zyx bits
-      HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
-      HAL_SPI_Receive(&hspi1, buffer,1 , 1000);
-
-      buffer[0] = 0x4E; // read command to get data from single measurement for ZYX only
-      HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
-      HAL_SPI_Receive(&hspi1, buffer,8 , 1000);
-
-      int16_t status = (buffer[0]);
-      int16_t fieldX = (buffer[1] << 8) | (buffer[2]);
-      int16_t fieldY = (buffer[3] << 8) | (buffer[4]);
-      int16_t fieldZ = (buffer[5] << 8) | (buffer[6]);
-      int16_t crc = buffer[7];
-      float f = (0.00714f * (1.0f / 100.0f));
-      float r = abs(fieldX) * f;
-      float b = abs(fieldY) * f;
-      float g = abs(fieldZ) * f;
-      if(r < 0.05f) r = 0;
-      if(g < 0.05f) g = 0;
-      if(b < 0.05f) b = 0;
-      led_set(r, g, b);
-
     /* USER CODE BEGIN 3 */
-    float deltaTime = clock_getDeltaTime();
-    led_rainbow(deltaTime);
+    buffer[0] = 0x3E; // single measurement cmd + zyx bits
+    HAL_GPIO_WritePin(SPI_CS_WS1_GPIO_Port, SPI_CS_WS1_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
+    HAL_SPI_Receive(&hspi1, buffer,1 , 1000);
+    HAL_GPIO_WritePin(SPI_CS_WS1_GPIO_Port, SPI_CS_WS1_Pin, GPIO_PIN_SET);
+
+    buffer[0] = 0x4E; // read command to get data from single measurement for ZYX only
+    HAL_GPIO_WritePin(SPI_CS_WS1_GPIO_Port, SPI_CS_WS1_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(&hspi1, buffer, 1, 1000);
+    HAL_SPI_Receive(&hspi1, buffer,8 , 1000);
+    HAL_GPIO_WritePin(SPI_CS_WS1_GPIO_Port, SPI_CS_WS1_Pin, GPIO_PIN_SET);
+
+    int16_t status = (buffer[0]);
+    int16_t fieldX = (buffer[1] << 8) | (buffer[2]);
+    int16_t fieldY = (buffer[3] << 8) | (buffer[4]);
+    int16_t fieldZ = (buffer[5] << 8) | (buffer[6]);
+    int16_t crc = buffer[7];
+    float f = 0.00714f * 0.10f;
+    float r = abs(fieldX) * f;
+    float b = abs(fieldY) * f;
+    float g = abs(fieldZ) * f;
+    float cutoff = 0.50f;
+    if(r < cutoff) r = 0;
+    if(g < cutoff) g = 0;
+    if(b < cutoff) b = 0;
+    led_set(r, g, b);
+
+//    float deltaTime = clock_getDeltaTime();
+//    led_rainbow(deltaTime);
   }
 
 
