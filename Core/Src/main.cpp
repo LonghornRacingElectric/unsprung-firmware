@@ -18,7 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "can.h"
+#include "angel_can.h"
+
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -49,6 +50,10 @@
 
 /* USER CODE BEGIN PV */
 static uint8_t buffer[10];
+volatile float displacement = 0;
+float max = 0.22;
+bool isHigh = false;
+float turns = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,6 +101,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   clock_init();
   led_init();
+    can_init(&hcan1);
 
 
   HAL_Delay(100);
@@ -103,12 +109,16 @@ int main(void)
 
 //    HAL_GPIO_WritePin()
 
+    /*Can Stuff*/
+    CanOutbox out;
+    can_addOutbox(UNSFR_VCU_DISP, 0.003f,&out);
 
-
-  /* USER CODE END 2 */
+    /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -131,17 +141,23 @@ int main(void)
     int16_t fieldY = (buffer[3] << 8) | (buffer[4]);
     int16_t fieldZ = (buffer[5] << 8) | (buffer[6]);
     int16_t crc = buffer[7];
-    float f = 0.00714f * 0.10f;
+    float f = 0.00714f * 0.01f;
     float r = abs(fieldX) * f;
     float b = abs(fieldY) * f;
     float g = abs(fieldZ) * f;
-    float cutoff = 0.50f;
-    if(r < cutoff) r = 0;
-    if(g < cutoff) g = 0;
-    if(b < cutoff) b = 0;
-    led_set(r, g, b);
+    led_set(0, g, 0);
+//    displacement =  f*fieldZ;
+    if(!isHigh && f*fieldZ> 0.03f){
+        isHigh = true;
+    }else if(isHigh && f*fieldZ< -0.03f){
+        isHigh = false;
+        displacement += (2*M_PI)/3;
+        turns = displacement/(M_PI*2);
+    }
+      can_writeFloat(uint32_t, &out, 0, displacement, 0.001f);
 
-//    float deltaTime = clock_getDeltaTime();
+    float deltaTime = clock_getDeltaTime();
+      can_periodic(deltaTime);
 //    led_rainbow(deltaTime);
   }
 
