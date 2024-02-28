@@ -54,6 +54,7 @@ volatile float displacement = 0;
 float max = 0.22;
 bool isHigh = false;
 float turns = 0;
+float thresh = 0.3;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -147,9 +148,9 @@ int main(void)
     float g = abs(fieldZ) * f;
     led_set(0, g, 0);
 //    displacement =  f*fieldZ;
-    if(!isHigh && f*fieldZ> 0.03f){
+    if(!isHigh && f*fieldZ> thresh){
         isHigh = true;
-    }else if(isHigh && f*fieldZ< -0.03f){
+    }else if(isHigh && f*fieldZ< -1*thresh){
         isHigh = false;
         displacement += (2*M_PI)/3;
         turns = displacement/(M_PI*2);
