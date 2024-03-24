@@ -18,8 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "angel_can.h"
-
 #include "spi.h"
 #include "tim.h"
 #include "gpio.h"
@@ -27,9 +25,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <cmath>
+#include "angel_can.h"
 #include "clock.h"
 #include "led.h"
 #include "wheelspeed.h"
+#include "vcu.h"
+#include "imu.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +51,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+const Location loc = FRONT_LEFT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,35 +101,31 @@ int main(void)
   led_init();
   can_init(&hcan1);
   wheelspeed_init(&hspi1);
+  imu_init(&hspi1);
+  vcu_init(loc);
 
-
-  HAL_Delay(100);
-
-
-//    HAL_GPIO_WritePin()
-
-    /* USER CODE END 2 */
+  WheelMagnetValues magnetValues;
+  xyz imuData;
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    WheelMagnetValues values;
-    wheelspeed_periodic(&values);
-    float r = abs(values.fieldX) * 0.01;
-    float b = abs(values.fieldY) * 0.01;
-    float g = abs(values.fieldZ) * 0.01;
-    led_set(0, g, 0);
+    if(imu_isAccelReady()) imu_getAccel(&imuData);
+    wheelspeed_periodic(&magnetValues);
+//    float r = abs(magnetValues.fieldX) * 0.01;
+//    float b = abs(magnetValues.fieldY) * 0.01;
+//    float g = abs(magnetValues.fieldZ) * 0.01;
+//    led_set(0, g, 0);
+    vcu_periodic(&magnetValues, &imuData);
 
     float deltaTime = clock_getDeltaTime();
     can_periodic(deltaTime);
-//  led_rainbow(deltaTime);
+     led_rainbow(deltaTime);
     }
 
 
