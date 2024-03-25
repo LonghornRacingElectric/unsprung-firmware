@@ -55,7 +55,6 @@ int wheelspeed_stop() {
 
 int wheelspeed_reset() {
   int error = wheelspeed_stop();
-  HAL_Delay(100);
   error += wheelspeed_start();
   return error;
 }
