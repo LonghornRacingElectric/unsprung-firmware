@@ -29,7 +29,6 @@ static void vcu_sendMagnets(WheelMagnetValues* values){
   can_writeFloat(int16_t, &outbox_magnet, 0, 0, 0.00714f); // Write null values as placeholders
   if(this_loc == FRONT_LEFT || this_loc == FRONT_RIGHT){ // use X or Y value
     can_writeFloat(int16_t, &outbox_magnet, 0, values->fieldX, 0.00714f);
-    volatile float test_val = can_readFloat(int16_t, &outbox_magnet, 0, 0.00714f);
   }
   else if(this_loc == BACK_LEFT || this_loc == BACK_RIGHT){ // use Z value
     can_writeFloat(int16_t, &outbox_magnet, 0, values->fieldZ, 0.00714f);

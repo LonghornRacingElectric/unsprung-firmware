@@ -2,11 +2,6 @@
 
 
 SPI_HandleTypeDef* hspi;
-volatile float displacement = 0;
-float max = 0.22;
-bool isHigh = false;
-float turns = 0;
-float thresh = 0.3;
 
 
 void wheelspeed_init(SPI_HandleTypeDef* hspi_init) {
@@ -25,6 +20,8 @@ void wheelspeed_send_receive(uint8_t addr, uint8_t* received, size_t recv_size) 
 
 int wheelspeed_start() {
   uint8_t status[1] = {0xFF};
+  wheelspeed_send_receive(BURST_MODE_ADDR, status, 1);
+  wheelspeed_send_receive(BURST_MODE_ADDR, status, 1);
   wheelspeed_send_receive(BURST_MODE_ADDR, status, 1);
   if (status[0] == 0xFF) {
     // not updated error
@@ -57,18 +54,6 @@ int wheelspeed_reset() {
   int error = wheelspeed_stop();
   error += wheelspeed_start();
   return error;
-}
-
-// Old Matt code that he transfered over to VCU Core
-[[maybe_unused]] int wheelspeed_calculate(WheelMagnetValues* values){
-  if(!isHigh && 0.01*values->fieldZ> thresh){
-    isHigh = true;
-  }else if(isHigh && 0.01*values->fieldZ< -1*thresh){
-    isHigh = false;
-    displacement += (2*3.1415)/3;
-    turns = displacement/(3.1415*2);
-  }
-  return 0;
 }
 
 void wheelspeed_periodic(WheelMagnetValues* values) {
