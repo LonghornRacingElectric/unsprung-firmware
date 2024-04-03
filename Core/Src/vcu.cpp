@@ -3,10 +3,8 @@
 
 CanOutbox outbox_magnet;
 CanOutbox outbox_imu;
-Location this_loc;
 
-void vcu_init(const Location loc){
-  this_loc = loc;
+void vcu_init(const int loc){
   if(loc == FRONT_LEFT) {
     can_addOutbox(UNSFL_VCU_MAGNET, 0.003f, &outbox_magnet);
     can_addOutbox(UNSFL_VCU_IMU, 0.003f, &outbox_imu);
@@ -25,14 +23,8 @@ void vcu_init(const Location loc){
   }
 }
 
-static void vcu_sendMagnets(WheelMagnetValues* values){
-  can_writeFloat(int16_t, &outbox_magnet, 0, 0, 0.00714f); // Write null values as placeholders
-  if(this_loc == FRONT_LEFT || this_loc == FRONT_RIGHT){ // use X or Y value
-    can_writeFloat(int16_t, &outbox_magnet, 0, values->fieldX, 0.00714f);
-  }
-  else if(this_loc == BACK_LEFT || this_loc == BACK_RIGHT){ // use Z value
-    can_writeFloat(int16_t, &outbox_magnet, 0, values->fieldZ, 0.00714f);
-  }
+static void vcu_sendMagnets(float magnetValue){
+  can_writeFloat(int16_t, &outbox_magnet, 0, magnetValue, 0.00714f);
   outbox_magnet.dlc = 2;
   outbox_magnet.isRecent = true;
 }
@@ -45,8 +37,10 @@ static void vcu_sendIMU(xyz* imu_accel){
   outbox_imu.isRecent = true;
 }
 
-void vcu_periodic(WheelMagnetValues* values, xyz* imu){
-  vcu_sendMagnets(values);
+void vcu_periodic(float magnetValue, xyz* imu){
+  if(magnetValue != 0.0f) {
+    vcu_sendMagnets(magnetValue);
+  }
   vcu_sendIMU(imu);
 }
 
