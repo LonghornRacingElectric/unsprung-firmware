@@ -18,13 +18,20 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "angel_can.h"
+#include "can.h"
+#include "spi.h"
 #include "tim.h"
 #include "gpio.h"
-#include "faults.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <cmath>
+#include "angel_can.h"
 #include "clock.h"
+#include "led.h"
+#include "wheelspeed.h"
+#include "vcu.h"
+#include "imu.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+xyz imuData;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,7 +52,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+const int loc = BACK_LEFT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,20 +96,40 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN1_Init();
   MX_TIM2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   clock_init();
+  led_init();
+
+  HAL_Delay(100);
+
+  can_init(&hcan1);
+  wheelspeed_init(&hspi1, loc);
+  imu_init(&hspi1);
+  vcu_init(loc);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if (imu_isAccelReady()) imu_getAccel(&imuData);
+
     float deltaTime = clock_getDeltaTime();
-    led_rainbow(deltaTime);
+    float magnetValue = wheelspeed_periodic(deltaTime);
+    vcu_periodic(magnetValue, &imuData);
+    can_periodic(deltaTime);
+
+    if (magnetValue != 0 && imuData.x != imuData.y) {
+      led_rainbow(deltaTime);
+    }
+
   }
+
+
   /* USER CODE END 3 */
 }
 
@@ -130,7 +157,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 10;
+  RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
@@ -148,7 +175,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -167,8 +194,11 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
+  while (1) {
+    led_set(1.0f, 0.0f, 0.0f);
+    for(volatile int x = 0; x < 2000000; x++);
+    led_set(0.0f, 0.0f, 0.0f);
+    for(volatile int x = 0; x < 2000000; x++);
   }
   /* USER CODE END Error_Handler_Debug */
 }
