@@ -52,7 +52,7 @@ xyz imuData;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-const int loc = BACK_LEFT;
+const int loc = BACK_RIGHT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

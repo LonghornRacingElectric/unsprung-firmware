@@ -24,7 +24,7 @@ void vcu_init(const int loc){
 }
 
 static void vcu_sendMagnets(float magnetValue){
-  can_writeFloat(int16_t, &outbox_magnet, 0, magnetValue, 0.00714f);
+  can_writeFloat(int16_t, &outbox_magnet, 0, magnetValue, 0.0025f);
   outbox_magnet.dlc = 2;
   outbox_magnet.isRecent = true;
 }

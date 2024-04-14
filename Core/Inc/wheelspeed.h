@@ -10,7 +10,7 @@
 #define STOP_READ_ADDR 0x80
 #define FRONT_ADDR_BITS 0x04
 #define REAR_ADDR_BITS 0x08
-#define CONVERSION_FACTOR 0.00714f
+#define CONVERSION_FACTOR 0.0025f
 #define FILTER_TIME_CONSTANT 0.006f
 
 typedef struct WheelMagnetValues { //converted to mT
