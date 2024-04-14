@@ -4,6 +4,10 @@
 static SPI_HandleTypeDef* hspi;
 static LowPassFilter filter(FILTER_TIME_CONSTANT);
 static uint8_t dataBits;
+bool ready1 = false;
+bool ready2 = false;
+float saved1 = 0;
+float saved2 = 0;
 
 
 void wheelspeed_init(SPI_HandleTypeDef *hspi_init, int location) {
@@ -68,6 +72,8 @@ int wheelspeed_reset() {
 }
 
 float wheelspeed_periodic(float delta_time) {
+  static float timer = 0;
+
   uint8_t results1[8] = {0};
   results1[0] = 0xFF;
   uint8_t results2[8] = {0};
@@ -80,18 +86,28 @@ float wheelspeed_periodic(float delta_time) {
   uint8_t status2 = results2[0];
   auto field2 = (int16_t) (results2[1] << 8 | results2[2]);
 
-  float fieldAverage = static_cast<float>(field1 + field2) * CONVERSION_FACTOR / 2.0f;
-
   uint8_t crc1 = results1[3]; // Maybe something fun to ruin someone's life later, but i don't rly care rn
   uint8_t crc2 = results2[3]; // Maybe something fun to ruin someone's life later, but i don't rly care rn
 
-  if(wheelspeed_errorhandler(status1, status2)){
-//    wheelspeed_reset();
+  bool nowReady1 = (status1 & 0x01) && (status1 != 0xFF);
+  ready1 = ready1 || nowReady1;
+  if(nowReady1) {
+    saved1 = field1;
   }
-  if((status1 & 0x01) && (status2 & 0x01)){
+
+  bool nowReady2 = (status2 & 0x01) && (status2 != 0xFF);
+  ready2 = ready2 || nowReady2;
+  if(nowReady2) {
+    saved2 = field2;
+  }
+
+  timer += delta_time;
+  if(ready1 && ready2){
+    float fieldAverage = static_cast<float>(saved1 + saved2) * CONVERSION_FACTOR / 2.0f;
     // This flag is set to 1 to indicate that new data is ready (not yet read), or when it is the first time that this data
     // is being read. This flag is updated after the measurement is done.
-    filter.add(fieldAverage, delta_time);
+    filter.add(fieldAverage, timer);
+    timer = 0;
   }
   return filter.get();
 }

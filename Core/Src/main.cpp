@@ -41,7 +41,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-WheelMagnetValues magnetValues;
 xyz imuData;
 /* USER CODE END PD */
 
@@ -53,7 +52,7 @@ xyz imuData;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-const int loc = FRONT_RIGHT;
+const int loc = BACK_LEFT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,6 +100,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   clock_init();
   led_init();
+
+  HAL_Delay(100);
+
   can_init(&hcan1);
   wheelspeed_init(&hspi1, loc);
   imu_init(&hspi1);
@@ -110,27 +112,18 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int count = 0;
-  int c2 = 0;
-  volatile int rate = 0;
   while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     if (imu_isAccelReady()) imu_getAccel(&imuData);
 
-//    float r = magnetValues.fieldX * 0.2f;
-//    float b = -magnetValues.fieldX * 0.2f;
-//    if(r < 0.3f) r = 0;
-//    if(b < 0.3f) b = 0;
-//    led_set(r, 0, b);
-
     float deltaTime = clock_getDeltaTime();
     float magnetValue = wheelspeed_periodic(deltaTime);
     vcu_periodic(magnetValue, &imuData);
     can_periodic(deltaTime);
 
-    if (magnetValue != 0) {
+    if (magnetValue != 0 && imuData.x != imuData.y) {
       led_rainbow(deltaTime);
     }
 
@@ -202,6 +195,10 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1) {
+    led_set(1.0f, 0.0f, 0.0f);
+    for(volatile int x = 0; x < 2000000; x++);
+    led_set(0.0f, 0.0f, 0.0f);
+    for(volatile int x = 0; x < 2000000; x++);
   }
   /* USER CODE END Error_Handler_Debug */
 }
